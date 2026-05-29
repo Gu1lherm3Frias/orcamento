@@ -1,0 +1,57 @@
+services:
+  orcamento:
+    build: .
+    image: orcamento:latest
+    container_name: orcamento
+    ports:
+      - "8000:80"
+    depends_on:
+      - mariadb
+    networks:
+      - orcamento-network
+    volumes:
+      - ./:/var/www/html
+    environment:
+      HOME: /tmp
+    user: "${UID:-1000}:${GID:-1000}"
+
+  mariadb:
+    image: mariadb:11
+    container_name: orcamento_mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: orcamento
+      MYSQL_USER: orcamento
+      MYSQL_PASSWORD: orcamento
+      MYSQL_ROOT_PASSWORD: orcamento
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - orcamento-network
+
+  selenium:
+    image: selenium/standalone-chrome
+    container_name: orcamento_selenium
+    ports:
+      - "7900:7900" # VNC (pra ver o browser rodando)
+    networks:
+      - orcamento-network
+    shm_size: 2gb
+    
+  senhaunica-faker:
+    image: uspdev/senhaunica-faker
+    container_name: orcamento_senhaunica-faker
+    ports:
+      - "3141:3141"
+    environment:
+          - APP_URL=http://auth.local:3141
+    networks:
+      orcamento-network:
+        aliases:
+          - auth.local
+
+networks:
+  orcamento-network:
+
+volumes:
+  mariadb_data:
