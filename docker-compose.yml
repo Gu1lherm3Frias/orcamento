@@ -1,6 +1,5 @@
 services:
   orcamento:
-    build: .
     image: orcamento:latest
     container_name: orcamento
     ports:
